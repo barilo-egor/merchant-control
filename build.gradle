@@ -1,12 +1,12 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.1'
+	id 'org.springframework.boot' version '3.5.7'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'tgb.cryptoexchange'
-version = '0.0.1-SNAPSHOT'
-description = 'dev-bot merchant-control'
+version = '0.0.1'
+description = 'dev-bot merchant-deals'
 
 java {
 	toolchain {
@@ -16,26 +16,42 @@ java {
 
 repositories {
 	mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
-
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+    implementation 'commons-codec:commons-codec:1.19.0'
+    implementation 'org.springframework.kafka:spring-kafka:3.3.10'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'tgb.cryptoexchange:commons:1.0'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'com.h2database:h2'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'tgb.cryptoexchange:common-api:1.1.0'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+tasks.withType(Test) {
+    systemProperty "file.encoding", "UTF-8"
+}
+
 tasks.jar {
-	archiveFileName = "merchant-control.jar"
+	archiveFileName = "merchant-deals.jar"
 }
 
 bootJar {
-	archiveFileName = 'merchant-control.jar'
+	archiveFileName = 'merchant-deals.jar'
 }
