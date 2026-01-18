@@ -6,7 +6,7 @@ plugins {
 
 group = 'tgb.cryptoexchange'
 version = '0.0.1'
-description = 'dev-bot merchant-deals'
+description = 'dev-bot merchant-control'
 
 java {
 	toolchain {
@@ -49,9 +49,9 @@ tasks.withType(Test) {
 }
 
 tasks.jar {
-	archiveFileName = "merchant-deals.jar"
+	archiveFileName = "merchant-control.jar"
 }
 
 bootJar {
-	archiveFileName = 'merchant-deals.jar'
+	archiveFileName = 'merchant-control.jar'
 }

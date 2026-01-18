@@ -1,5 +1,5 @@
 spring:
   application:
-    name: merchant-deal-test
+    name: merchant-control-test
   config:
     import: ""
