@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -83,23 +84,30 @@ class DealServiceTest {
     }
 
     @Test
-    @DisplayName("deleteById должен вызывать репозиторий, если тикет существует")
-    void deleteById_ShouldExecute_WhenExists() {
+    @DisplayName("deleteByMerchant  должен вызывать репозиторий, если сделки существуют")
+    void deleteByMerchant_ShouldExecute_WhenExists() {
         Merchant merchant = Merchant.NEURAL_PAY;
-        when(dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(merchant, any(Instant.class))).thenReturn(true);
+        Instant now = Instant.now();
 
-        dealService.deleteByMerchantAndDate(merchant, Instant.now());
+        when(dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(eq(merchant), any(Instant.class)))
+                .thenReturn(true);
 
-        verify(dealRepository).deleteByMerchantAndCreateDateGreaterThanEqual(merchant, Instant.now());
+        dealService.deleteByMerchantAndDate(merchant, now);
+
+        verify(dealRepository).deleteByMerchantAndCreateDateGreaterThanEqual(eq(merchant), eq(now));
     }
 
     @Test
     @DisplayName("deleteByMerchant должен пробросить исключение BadRequestException, если тикета нет")
-    void deleteById_ShouldNotExecute_WhenNotExists() {
+    void deleteByMerchant_ShouldNotExecute_WhenNotExists() {
         Merchant merchant = Merchant.NEURAL_PAY;
-        when(dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(merchant, any(Instant.class))).thenReturn(false);
+        when(dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(eq(merchant), any(Instant.class)))
+                .thenReturn(false);
 
-        assertThatException().isThrownBy(() -> dealService.deleteByMerchantAndDate(merchant, Instant.now()))
-                .isInstanceOf(BadRequestException.class);
+        assertThatExceptionOfType(BadRequestException.class)
+                .isThrownBy(() -> dealService.deleteByMerchantAndDate(merchant, Instant.now()));
+
+        verify(dealRepository, never()).deleteByMerchantAndCreateDateGreaterThanEqual(any(), any());
     }
+
 }

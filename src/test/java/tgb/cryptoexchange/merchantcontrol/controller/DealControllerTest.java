@@ -53,11 +53,13 @@ class DealControllerTest {
     @DisplayName("DELETE /merchant-control/{merchant} должен возвращать 200")
     void deleteByMerchant_ShouldReturnOk() throws Exception {
         Merchant merchant = Merchant.NEURAL_PAY;
+        Instant dealLastDate = Instant.now();
 
-        mockMvc.perform(delete("/merchant-control/{merchant}", merchant))
+        mockMvc.perform(delete("/merchant-control/{merchant}", merchant)
+                        .param("dealLastDate", dealLastDate.toString()))
                 .andExpect(status().isOk());
 
-        verify(dealService, times(1)).deleteByMerchantAndDate(merchant, any(Instant.class));
+        verify(dealService, times(1)).deleteByMerchantAndDate(eq(merchant), any(Instant.class));
     }
 
     @Test
