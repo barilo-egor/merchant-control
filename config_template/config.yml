@@ -1,0 +1,27 @@
+springdoc:
+  swagger-ui:
+    enabled: "true"
+    path: "/swagger"
+  api-docs:
+    path: "/swagger/api-docs"
+spring:
+  port:
+  datasource:
+    username:
+    password:
+    url:
+    driver-class-name:
+  jpa:
+    hibernate:
+      ddl-auto:
+details:
+  executor:
+    core-pool-size:
+    max-pool-size:
+    queue-capacity:
+
+kafka:
+  group-id:
+  topic:
+    deal:
+      request:
