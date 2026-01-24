@@ -11,6 +11,7 @@ import tgb.cryptoexchange.commons.enums.Merchant;
 import tgb.cryptoexchange.merchantcontrol.dto.DealSummaryDTO;
 import tgb.cryptoexchange.merchantcontrol.service.DealService;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -56,7 +57,7 @@ class DealControllerTest {
         mockMvc.perform(delete("/merchant-control/{merchant}", merchant))
                 .andExpect(status().isOk());
 
-        verify(dealService, times(1)).deleteByMerchant(merchant);
+        verify(dealService, times(1)).deleteByMerchantAndDate(merchant, any(Instant.class));
     }
 
     @Test

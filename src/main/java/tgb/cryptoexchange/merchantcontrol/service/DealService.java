@@ -9,6 +9,7 @@ import tgb.cryptoexchange.merchantcontrol.entity.Deal;
 import tgb.cryptoexchange.merchantcontrol.kafka.DealReceive;
 import tgb.cryptoexchange.merchantcontrol.repository.DealRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -28,6 +29,7 @@ public class DealService {
                 .appId(dealReceive.getAppId())
                 .merchant(dealReceive.getMerchant())
                 .amount(dealReceive.getAmount())
+                .createDate(dealReceive.getCreateDate())
                 .build();
         dealRepository.save(deal);
         log.info("Сделка сохранена с ID: {}", deal.getId());
@@ -40,14 +42,14 @@ public class DealService {
         return DealSummaryDTO.fromEntity(deals);
     }
 
-    public void deleteByMerchant(Merchant merchant) {
-        log.info("Запрос на удаление всех сделок мерчанта: {}", merchant);
-        if (dealRepository.existsByMerchant(merchant)) {
-            dealRepository.deleteByMerchant(merchant);
-            log.info("Удалены сделки для мерчанта = {}", merchant);
+    public void deleteByMerchantAndDate(Merchant merchant, Instant dealLastDate) {
+        log.info("Запрос на удаление всех сделок мерчанта: {} до {}", merchant, dealLastDate);
+        if (dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(merchant, dealLastDate)) {
+            dealRepository.deleteByMerchantAndCreateDateGreaterThanEqual(merchant, dealLastDate);
+            log.info("Удалены сделки для мерчанта = {} до {}", merchant, dealLastDate);
         } else {
-            log.warn("Сделок для мерчанта = {} не существует.", merchant);
-            throw new BadRequestException(String.format("Deal with merchant %s not found.", merchant));
+            log.warn("Сделок для мерчанта = {} до {} не существует.", merchant, dealLastDate);
+            throw new BadRequestException(String.format("Deal with merchant %s before create date %s not found.", merchant, dealLastDate));
         }
     }
 

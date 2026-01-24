@@ -8,6 +8,7 @@ import tgb.cryptoexchange.commons.enums.Merchant;
 import tgb.cryptoexchange.merchantcontrol.exception.DeserializeEventException;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 
 @Data
 public class DealReceive {
@@ -19,6 +20,8 @@ public class DealReceive {
     private Merchant merchant;
 
     private Integer amount;
+
+    private Instant createDate;
 
     public static class KafkaDeserializer implements Deserializer<DealReceive> {
 

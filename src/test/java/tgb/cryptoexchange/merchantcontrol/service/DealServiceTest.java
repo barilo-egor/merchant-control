@@ -13,6 +13,7 @@ import tgb.cryptoexchange.merchantcontrol.entity.Deal;
 import tgb.cryptoexchange.merchantcontrol.kafka.DealReceive;
 import tgb.cryptoexchange.merchantcontrol.repository.DealRepository;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,7 +51,7 @@ class DealServiceTest {
         Merchant merchant = Merchant.NEURAL_PAY;
         Deal deal1 = Deal.builder().dealId(1L).merchant(merchant).amount(500).build();
         Deal deal2 = Deal.builder().dealId(2L).merchant(merchant).amount(756).build();
-        List<Deal> deals =List.of(deal1, deal2);
+        List<Deal> deals = List.of(deal1, deal2);
 
         when(dealRepository.findAllByMerchant(merchant)).thenReturn(deals);
 
@@ -85,19 +86,20 @@ class DealServiceTest {
     @DisplayName("deleteById должен вызывать репозиторий, если тикет существует")
     void deleteById_ShouldExecute_WhenExists() {
         Merchant merchant = Merchant.NEURAL_PAY;
-        when(dealRepository.existsByMerchant(merchant)).thenReturn(true);
+        when(dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(merchant, any(Instant.class))).thenReturn(true);
 
-        dealService.deleteByMerchant(merchant);
+        dealService.deleteByMerchantAndDate(merchant, Instant.now());
 
-        verify(dealRepository).deleteByMerchant(merchant);
+        verify(dealRepository).deleteByMerchantAndCreateDateGreaterThanEqual(merchant, Instant.now());
     }
 
     @Test
     @DisplayName("deleteByMerchant должен пробросить исключение BadRequestException, если тикета нет")
     void deleteById_ShouldNotExecute_WhenNotExists() {
         Merchant merchant = Merchant.NEURAL_PAY;
-        when(dealRepository.existsByMerchant(merchant)).thenReturn(false);
+        when(dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(merchant, any(Instant.class))).thenReturn(false);
 
-        assertThatException().isThrownBy(() -> dealService.deleteByMerchant(merchant)).isInstanceOf(BadRequestException.class);
+        assertThatException().isThrownBy(() -> dealService.deleteByMerchantAndDate(merchant, Instant.now()))
+                .isInstanceOf(BadRequestException.class);
     }
 }

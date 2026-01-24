@@ -11,6 +11,8 @@ import tgb.cryptoexchange.merchantcontrol.dto.DealSummaryDTO;
 import tgb.cryptoexchange.merchantcontrol.entity.Deal;
 import tgb.cryptoexchange.merchantcontrol.repository.DealRepository;
 
+import java.time.Instant;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -27,13 +29,13 @@ class DealServiceIntegrationTest {
     void setUp() {
         dealRepository.deleteAll();
         dealRepository.save(
-                Deal.builder().dealId(1L).appId("BULBA").merchant(Merchant.NEURAL_PAY).amount(1234)
+                Deal.builder().dealId(1L).appId("BULBA").merchant(Merchant.NEURAL_PAY).amount(1234).createDate(Instant.now())
                         .build());
         dealRepository.save(
-                Deal.builder().dealId(2L).appId("TG").merchant(Merchant.SETTLE_X).amount(1388)
+                Deal.builder().dealId(2L).appId("TG").merchant(Merchant.SETTLE_X).amount(1388).createDate(Instant.now())
                         .build());
         dealRepository.save(
-                Deal.builder().dealId(3L).appId("TG").merchant(Merchant.NEURAL_PAY).amount(456)
+                Deal.builder().dealId(3L).appId("TG").merchant(Merchant.NEURAL_PAY).amount(456).createDate(Instant.now())
                         .build());
     }
 
@@ -57,5 +59,24 @@ class DealServiceIntegrationTest {
         assertThat(result.getTotalAmount()).isZero();
         assertThat(result.getDealIds()).isEmpty();
     }
+
+    @Test
+    @DisplayName("existsByMerchantAndCreateDateLessThanEqual должен находить старые сделки")
+    void existsByMerchantAndCreateDateLessThanEqual_ShouldFindOlderDeals() {
+        Merchant merchant = Merchant.NEURAL_PAY;
+        Instant referenceDate = Instant.now().minusSeconds(60);
+
+        dealRepository.save(Deal.builder()
+                .dealId(10L)
+                .amount(5)
+                .appId("BULBA")
+                .merchant(merchant)
+                .createDate(referenceDate.minusSeconds(60))
+                .build());
+        boolean exists = dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(merchant, referenceDate);
+
+        assertThat(exists).isTrue();
+    }
+
 
 }

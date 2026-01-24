@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import tgb.cryptoexchange.commons.enums.Merchant;
 
+import java.time.Instant;
+
 @Entity
 @Data
 @Builder
@@ -30,5 +32,8 @@ public class Deal {
 
     @Column(nullable = false)
     private Integer amount;
+
+    @Column(nullable = false)
+    private Instant createDate;
 
 }

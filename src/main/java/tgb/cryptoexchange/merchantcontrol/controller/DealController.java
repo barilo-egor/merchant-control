@@ -10,6 +10,8 @@ import tgb.cryptoexchange.merchantcontrol.dto.DealSummaryDTO;
 import tgb.cryptoexchange.merchantcontrol.service.DealService;
 import tgb.cryptoexchange.web.ApiResponse;
 
+import java.time.Instant;
+
 @RestController
 @RequestMapping("/merchant-control")
 @Slf4j
@@ -31,8 +33,8 @@ public class DealController extends ApiController {
 
     @DeleteMapping("/{merchant}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteByMerchant(@PathVariable Merchant merchant) {
-        dealService.deleteByMerchant(merchant);
+    public void deleteByMerchant(@PathVariable Merchant merchant, @RequestParam Instant dealLastDate) {
+        dealService.deleteByMerchantAndDate(merchant, dealLastDate);
     }
 
 }
