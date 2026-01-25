@@ -73,7 +73,7 @@ class DealServiceIntegrationTest {
                 .merchant(merchant)
                 .createDate(referenceDate.minusSeconds(60))
                 .build());
-        boolean exists = dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(merchant, referenceDate);
+        boolean exists = dealRepository.existsByMerchantAndCreateDateLessThanEqual(merchant, referenceDate);
 
         assertThat(exists).isTrue();
     }

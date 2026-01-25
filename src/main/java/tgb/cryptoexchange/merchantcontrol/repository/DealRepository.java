@@ -13,10 +13,10 @@ public interface DealRepository extends JpaRepository<Deal, Long>, JpaSpecificat
 
     List<Deal> findAllByMerchant(Merchant merchant);
 
-    boolean existsByMerchantAndCreateDateGreaterThanEqual(Merchant merchant, Instant createDate);
+    boolean existsByMerchantAndCreateDateLessThanEqual(Merchant merchant, Instant createDate);
 
 
     @Transactional
-    void deleteByMerchantAndCreateDateGreaterThanEqual(Merchant merchant, Instant createDate);
+    void deleteByMerchantAndCreateDateLessThanEqual(Merchant merchant, Instant createDate);
 
 }
