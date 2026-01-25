@@ -44,8 +44,8 @@ public class DealService {
 
     public void deleteByMerchantAndDate(Merchant merchant, Instant dealLastDate) {
         log.info("Запрос на удаление всех сделок мерчанта: {} до {}", merchant, dealLastDate);
-        if (dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(merchant, dealLastDate)) {
-            dealRepository.deleteByMerchantAndCreateDateGreaterThanEqual(merchant, dealLastDate);
+        if (dealRepository.existsByMerchantAndCreateDateLessThanEqual(merchant, dealLastDate)) {
+            dealRepository.deleteByMerchantAndCreateDateLessThanEqual(merchant, dealLastDate);
             log.info("Удалены сделки для мерчанта = {} до {}", merchant, dealLastDate);
         } else {
             log.warn("Сделок для мерчанта = {} до {} не существует.", merchant, dealLastDate);

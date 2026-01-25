@@ -89,25 +89,25 @@ class DealServiceTest {
         Merchant merchant = Merchant.NEURAL_PAY;
         Instant now = Instant.now();
 
-        when(dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(eq(merchant), any(Instant.class)))
+        when(dealRepository.existsByMerchantAndCreateDateLessThanEqual(eq(merchant), any(Instant.class)))
                 .thenReturn(true);
 
         dealService.deleteByMerchantAndDate(merchant, now);
 
-        verify(dealRepository).deleteByMerchantAndCreateDateGreaterThanEqual(eq(merchant), eq(now));
+        verify(dealRepository).deleteByMerchantAndCreateDateLessThanEqual(eq(merchant), eq(now));
     }
 
     @Test
     @DisplayName("deleteByMerchant должен пробросить исключение BadRequestException, если тикета нет")
     void deleteByMerchant_ShouldNotExecute_WhenNotExists() {
         Merchant merchant = Merchant.NEURAL_PAY;
-        when(dealRepository.existsByMerchantAndCreateDateGreaterThanEqual(eq(merchant), any(Instant.class)))
+        when(dealRepository.existsByMerchantAndCreateDateLessThanEqual(eq(merchant), any(Instant.class)))
                 .thenReturn(false);
 
         assertThatExceptionOfType(BadRequestException.class)
                 .isThrownBy(() -> dealService.deleteByMerchantAndDate(merchant, Instant.now()));
 
-        verify(dealRepository, never()).deleteByMerchantAndCreateDateGreaterThanEqual(any(), any());
+        verify(dealRepository, never()).deleteByMerchantAndCreateDateLessThanEqual(any(), any());
     }
 
 }
