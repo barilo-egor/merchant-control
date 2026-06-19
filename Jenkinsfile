@@ -11,14 +11,14 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'chmod +x gradlew'
-                sh './gradlew clean bootJar --no-daemon'
+                sh './gradlew clean test bootJar --no-daemon'
             }
         }
         stage('Deploy') {
             steps {
                 sshagent([env.SSH_CRED_ID]) {
                     sh "scp -P ${SSH_PORT} build/libs/merchant-control.jar ${SSH_USER}@${MERCHANT_CONTROL_DEPLOY_HOST}:${MERCHANT_CONTROL_DEPLOY_PATH}/"
-                    sh "ssh -p ${SSH_PORT} ${SSH_USER}@${MERCHANT_CONTROL_DEPLOY_HOST} 'cd /srv/merchant-control && docker rollout --wait 60 --timeout 60 merchant-control'"
+                    sh "ssh -p ${SSH_PORT} ${SSH_USER}@${MERCHANT_CONTROL_DEPLOY_HOST} 'cd /srv/merchant-control && docker rollout --timeout 120 merchant-control'"
                 }
             }
         }
