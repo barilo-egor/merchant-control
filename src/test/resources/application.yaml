@@ -3,3 +3,6 @@ spring:
     name: merchant-control-test
   config:
     import: ""
+  cloud:
+    config:
+      enabled: false
