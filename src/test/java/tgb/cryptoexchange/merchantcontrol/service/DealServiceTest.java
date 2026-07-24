@@ -38,7 +38,7 @@ class DealServiceTest {
         DealReceive request = new DealReceive();
         request.setDealId(123L);
         request.setAppId("BULBA");
-        request.setMerchant(Merchant.NEURAL_PAY);
+        request.setMerchant(Merchant.ALFA_TEAM);
         request.setAmount(322);
 
         dealService.save(request);
@@ -49,7 +49,7 @@ class DealServiceTest {
     @Test
     @DisplayName("findByMerchant должен возвращать общую сумму сделок для мерчанта")
     void findById_ShouldReturnDealSummary_WhenFound() {
-        Merchant merchant = Merchant.NEURAL_PAY;
+        Merchant merchant = Merchant.ALFA_TEAM;
         Deal deal1 = Deal.builder().dealId(1L).merchant(merchant).amount(500).build();
         Deal deal2 = Deal.builder().dealId(2L).merchant(merchant).amount(756).build();
         List<Deal> deals = List.of(deal1, deal2);
@@ -69,7 +69,7 @@ class DealServiceTest {
     @Test
     @DisplayName("findByMerchant должен возвращать пустой DTO с нулевой суммой, если сделок не найдено")
     void findByMerchant_ShouldReturnEmptySummary_WhenNoDealsFound() {
-        Merchant merchant = Merchant.NEURAL_PAY;
+        Merchant merchant = Merchant.ALFA_TEAM;
         when(dealRepository.findAllByMerchant(merchant)).thenReturn(Collections.emptyList());
 
         DealSummaryDTO result = dealService.findByMerchant(merchant);
@@ -86,7 +86,7 @@ class DealServiceTest {
     @Test
     @DisplayName("deleteByMerchant  должен вызывать репозиторий, если сделки существуют")
     void deleteByMerchant_ShouldExecute_WhenExists() {
-        Merchant merchant = Merchant.NEURAL_PAY;
+        Merchant merchant = Merchant.ALFA_TEAM;
         Instant now = Instant.now();
 
         when(dealRepository.existsByMerchantAndCreateDateLessThanEqual(eq(merchant), any(Instant.class)))
@@ -100,7 +100,7 @@ class DealServiceTest {
     @Test
     @DisplayName("deleteByMerchant должен пробросить исключение BadRequestException, если тикета нет")
     void deleteByMerchant_ShouldNotExecute_WhenNotExists() {
-        Merchant merchant = Merchant.NEURAL_PAY;
+        Merchant merchant = Merchant.ALFA_TEAM;
         when(dealRepository.existsByMerchantAndCreateDateLessThanEqual(eq(merchant), any(Instant.class)))
                 .thenReturn(false);
 

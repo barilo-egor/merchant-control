@@ -29,20 +29,20 @@ class DealServiceIntegrationTest {
     void setUp() {
         dealRepository.deleteAll();
         dealRepository.save(
-                Deal.builder().dealId(1L).appId("BULBA").merchant(Merchant.NEURAL_PAY).amount(1234).createDate(Instant.now())
+                Deal.builder().dealId(1L).appId("BULBA").merchant(Merchant.ALFA_TEAM).amount(1234).createDate(Instant.now())
                         .build());
         dealRepository.save(
                 Deal.builder().dealId(2L).appId("TG").merchant(Merchant.SETTLE_X).amount(1388).createDate(Instant.now())
                         .build());
         dealRepository.save(
-                Deal.builder().dealId(3L).appId("TG").merchant(Merchant.NEURAL_PAY).amount(456).createDate(Instant.now())
+                Deal.builder().dealId(3L).appId("TG").merchant(Merchant.ALFA_TEAM).amount(456).createDate(Instant.now())
                         .build());
     }
 
     @Test
     @DisplayName("findByMerchant должен корректно суммировать сделки для мерчанта")
     void findByMerchant_ShouldReturnCorrectSummary() {
-        DealSummaryDTO result = dealService.findByMerchant(Merchant.NEURAL_PAY);
+        DealSummaryDTO result = dealService.findByMerchant(Merchant.ALFA_TEAM);
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalAmount()).isEqualTo(1690);
@@ -63,7 +63,7 @@ class DealServiceIntegrationTest {
     @Test
     @DisplayName("existsByMerchantAndCreateDateLessThanEqual должен находить старые сделки")
     void existsByMerchantAndCreateDateLessThanEqual_ShouldFindOlderDeals() {
-        Merchant merchant = Merchant.NEURAL_PAY;
+        Merchant merchant = Merchant.ALFA_TEAM;
         Instant referenceDate = Instant.now().minusSeconds(60);
 
         dealRepository.save(Deal.builder()

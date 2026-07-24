@@ -31,7 +31,7 @@ class DealControllerTest {
     @Test
     @DisplayName("GET /merchant-control/{merchant} должен возвращать 200 и данные")
     void findByMerchant_ShouldReturnSuccess() throws Exception {
-        Merchant merchant = Merchant.NEURAL_PAY;
+        Merchant merchant = Merchant.ALFA_TEAM;
         DealSummaryDTO summary = DealSummaryDTO.builder()
                 .dealIds(List.of(1L, 2L))
                 .totalAmount(2000)
@@ -52,7 +52,7 @@ class DealControllerTest {
     @Test
     @DisplayName("DELETE /merchant-control/{merchant} должен возвращать 200")
     void deleteByMerchant_ShouldReturnOk() throws Exception {
-        Merchant merchant = Merchant.NEURAL_PAY;
+        Merchant merchant = Merchant.ALFA_TEAM;
         Instant dealLastDate = Instant.now();
 
         mockMvc.perform(delete("/merchant-control/{merchant}", merchant)
