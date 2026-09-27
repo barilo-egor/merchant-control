@@ -17,7 +17,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,18 +49,21 @@ class DealServiceTest {
     @DisplayName("findByMerchant должен возвращать общую сумму сделок для мерчанта")
     void findById_ShouldReturnDealSummary_WhenFound() {
         Merchant merchant = Merchant.ALFA_TEAM;
-        Deal deal1 = Deal.builder().dealId(1L).merchant(merchant).amount(500).build();
-        Deal deal2 = Deal.builder().dealId(2L).merchant(merchant).amount(756).build();
+        String appId = "app1";
+        Deal deal1 = Deal.builder().dealId(1L).appId(appId).merchant(merchant).amount(500).build();
+        Deal deal2 = Deal.builder().dealId(2L).appId(appId).merchant(merchant).amount(756).build();
         List<Deal> deals = List.of(deal1, deal2);
 
         when(dealRepository.findAllByMerchant(merchant)).thenReturn(deals);
 
-        DealSummaryDTO result = dealService.findByMerchant(merchant);
+        DealSummaryDTO result = dealService.findByMerchant(merchant, null);
 
         assertNotNull(result);
-        assertEquals(2, result.getDealIds().size());
-        assertTrue(result.getDealIds().containsAll(List.of(1L, 2L)));
         assertEquals(1256, result.getTotalAmount());
+        assertNotNull(result.getDealIdsByAppId());
+        assertTrue(result.getDealIdsByAppId().containsKey(appId));
+        assertEquals(2, result.getDealIdsByAppId().get(appId).size());
+        assertTrue(result.getDealIdsByAppId().get(appId).containsAll(List.of(1L, 2L)));
 
         verify(dealRepository, times(1)).findAllByMerchant(merchant);
     }
@@ -72,13 +74,12 @@ class DealServiceTest {
         Merchant merchant = Merchant.ALFA_TEAM;
         when(dealRepository.findAllByMerchant(merchant)).thenReturn(Collections.emptyList());
 
-        DealSummaryDTO result = dealService.findByMerchant(merchant);
+        DealSummaryDTO result = dealService.findByMerchant(merchant, null);
 
         assertNotNull(result, "Результат не должен быть null");
-
         assertEquals(0, result.getTotalAmount(), "Сумма должна быть 0");
-        assertNotNull(result.getDealIds(), "Список ID не должен быть null");
-        assertTrue(result.getDealIds().isEmpty(), "Список ID должен быть пустым");
+        assertNotNull(result.getDealIdsByAppId(), "Мапа ID по appId не должна быть null");
+        assertTrue(result.getDealIdsByAppId().isEmpty(), "Мапа ID по appId должна быть пустой");
 
         verify(dealRepository).findAllByMerchant(merchant);
     }

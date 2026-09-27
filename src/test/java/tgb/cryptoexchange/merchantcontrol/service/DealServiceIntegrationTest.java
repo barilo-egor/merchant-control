@@ -1,5 +1,6 @@
 package tgb.cryptoexchange.merchantcontrol.service;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,10 @@ import tgb.cryptoexchange.merchantcontrol.entity.Deal;
 import tgb.cryptoexchange.merchantcontrol.repository.DealRepository;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -42,22 +46,30 @@ class DealServiceIntegrationTest {
     @Test
     @DisplayName("findByMerchant должен корректно суммировать сделки для мерчанта")
     void findByMerchant_ShouldReturnCorrectSummary() {
-        DealSummaryDTO result = dealService.findByMerchant(Merchant.ALFA_TEAM);
+        DealSummaryDTO result = dealService.findByMerchant(Merchant.ALFA_TEAM, null);
 
         assertThat(result).isNotNull();
         assertThat(result.getTotalAmount()).isEqualTo(1690);
-        assertThat(result.getDealIds()).hasSize(2);
-        assertThat(result.getDealIds()).containsExactlyInAnyOrder(1L, 3L);
+
+        List<Long> allDealIds = result.getDealIdsByAppId().values().stream()
+                .flatMap(Collection::stream)
+                .toList();
+
+        assertThat(allDealIds)
+                .hasSize(2)
+                .containsExactlyInAnyOrder(1L, 3L);
     }
 
     @Test
     @DisplayName("findByMerchant должен возвращать пустой DTO для мерчанта без сделок")
     void findByMerchant_ShouldReturnEmptySummary_WhenMerchantHasNoDeals() {
-        DealSummaryDTO result = dealService.findByMerchant(Merchant.BIT_ZONE);
+        DealSummaryDTO result = dealService.findByMerchant(Merchant.BIT_ZONE, null);
 
-        assertThat(result).isNotNull();
-        assertThat(result.getTotalAmount()).isZero();
-        assertThat(result.getDealIds()).isEmpty();
+        assertThat(result)
+                .isNotNull()
+                .returns(0, DealSummaryDTO::getTotalAmount)
+                .extracting(DealSummaryDTO::getDealIdsByAppId, as(InstanceOfAssertFactories.MAP))
+                .isEmpty();
     }
 
     @Test

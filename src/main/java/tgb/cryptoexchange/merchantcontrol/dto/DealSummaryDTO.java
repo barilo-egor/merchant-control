@@ -8,12 +8,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.CollectionUtils;
+import tgb.cryptoexchange.commons.enums.Merchant;
 import tgb.cryptoexchange.merchantcontrol.entity.Deal;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Data
 @Builder
@@ -23,39 +22,51 @@ import java.util.List;
 public class DealSummaryDTO {
 
     @Builder.Default
-    private List<Long> dealIds = new ArrayList<>();
+    private Map<String, List<Long>> dealIdsByAppId = new HashMap<>();
 
     private Integer totalAmount;
 
     @JsonSerialize(using = InstantSerializer.class)
     private Instant dealLastDate;
 
-    public static DealSummaryDTO fromEntity(List<Deal> deals) {
+    private Merchant merchant;
+
+    private String appId;
+
+    public static DealSummaryDTO fromEntity(Merchant merchant, List<Deal> deals) {
         if (CollectionUtils.isEmpty(deals)) {
             return DealSummaryDTO.builder()
-                    .dealIds(Collections.emptyList())
+                    .dealIdsByAppId(Collections.emptyMap())
+                    .merchant(merchant)
                     .totalAmount(0)
                     .build();
         }
 
-        List<Long> ids = new ArrayList<>(deals.size());
+        Map<String, List<Long>> idsByAppId = new HashMap<>();
         int totalAmount = 0;
         Instant lastDate = null;
+
         for (Deal deal : deals) {
-            ids.add(deal.getDealId());
-            if (deal.getAmount() != null) {
+            if (Objects.nonNull(deal.getAppId()) && Objects.nonNull(deal.getDealId())) {
+                idsByAppId.computeIfAbsent(deal.getAppId(), k -> new ArrayList<>())
+                        .add(deal.getDealId());
+            }
+
+            if (Objects.nonNull(deal.getAmount())) {
                 totalAmount += deal.getAmount();
             }
-            Instant currentDate = deal.getCreateDate();
-            if (currentDate != null && (lastDate == null || currentDate.isAfter(lastDate))) {
-                    lastDate = currentDate;
-                }
 
+            Instant currentDate = deal.getCreateDate();
+            if (Objects.nonNull(currentDate) && (Objects.isNull(lastDate) || currentDate.isAfter(lastDate))) {
+                lastDate = currentDate;
+            }
         }
+
         return DealSummaryDTO.builder()
-                .dealIds(ids)
+                .dealIdsByAppId(idsByAppId)
                 .totalAmount(totalAmount)
                 .dealLastDate(lastDate)
+                .merchant(merchant)
                 .build();
 
     }
