@@ -11,6 +11,8 @@ import tgb.cryptoexchange.merchantcontrol.repository.DealRepository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -36,10 +38,28 @@ public class DealService {
     }
 
 
-    public DealSummaryDTO findByMerchant(Merchant merchant) {
-        log.debug("Запрос на получение общей суммы сделок для мерчанта: {}", merchant);
-        List<Deal> deals = dealRepository.findAllByMerchant(merchant);
-        return DealSummaryDTO.fromEntity(deals);
+    public DealSummaryDTO findByMerchant(Merchant merchant, Instant dealLastDate) {
+        log.debug("Запрос на получение сделок для мерчанта: {}, до даты: {}", merchant, dealLastDate);
+
+        List<Deal> deals = (dealLastDate != null)
+                ? dealRepository.findAllByMerchantAndCreateDateLessThanEqual(merchant, dealLastDate)
+                : dealRepository.findAllByMerchant(merchant);
+
+        return DealSummaryDTO.fromEntity(merchant, deals);
+    }
+
+    public List<DealSummaryDTO> findByMerchants(List<Merchant> merchants) {
+        log.debug("Запрос на получение общих сумм сделок для мерчантов: {}", merchants);
+        List<Deal> deals = dealRepository.findAllByMerchantIn(merchants);
+        Map<Merchant, List<Deal>> dealsByMerchant = deals.stream()
+                .collect(Collectors.groupingBy(Deal::getMerchant));
+
+        return merchants.stream()
+                .map(merchant -> DealSummaryDTO.fromEntity(
+                        merchant,
+                        dealsByMerchant.getOrDefault(merchant, List.of())
+                ))
+                .toList();
     }
 
     public void deleteByMerchantAndDate(Merchant merchant, Instant dealLastDate) {

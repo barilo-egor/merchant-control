@@ -13,6 +13,7 @@ import tgb.cryptoexchange.merchantcontrol.service.DealService;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -33,20 +34,21 @@ class DealControllerTest {
     void findByMerchant_ShouldReturnSuccess() throws Exception {
         Merchant merchant = Merchant.ALFA_TEAM;
         DealSummaryDTO summary = DealSummaryDTO.builder()
-                .dealIds(List.of(1L, 2L))
+                .dealIdsByAppId(Map.of("app1", List.of(1L, 2L)))
                 .totalAmount(2000)
                 .build();
 
-        when(dealService.findByMerchant(merchant)).thenReturn(summary);
+        when(dealService.findByMerchant(merchant, null)).thenReturn(summary);
 
         mockMvc.perform(get("/merchant-control/{merchant}", merchant))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.totalAmount").value(2000))
-                .andExpect(jsonPath("$.data.dealIds").isArray())
-                .andExpect(jsonPath("$.data.dealIds[0]").value(1));
+                .andExpect(jsonPath("$.data.dealIdsByAppId.app1").isArray())
+                .andExpect(jsonPath("$.data.dealIdsByAppId.app1[0]").value(1))
+                .andExpect(jsonPath("$.data.dealIdsByAppId.app1[1]").value(2));
 
-        verify(dealService, times(1)).findByMerchant(merchant);
+        verify(dealService, times(1)).findByMerchant(merchant, null);
     }
 
     @Test

@@ -11,6 +11,7 @@ import tgb.cryptoexchange.merchantcontrol.service.DealService;
 import tgb.cryptoexchange.web.ApiResponse;
 
 import java.time.Instant;
+import java.util.List;
 
 @RestController
 @RequestMapping("/merchant-control")
@@ -24,11 +25,15 @@ public class DealController extends ApiController {
     }
 
     @GetMapping("/{merchant}")
-    public ResponseEntity<ApiResponse<DealSummaryDTO>> findByMerchant(@PathVariable Merchant merchant) {
-        return new ResponseEntity<>(ApiResponse.success(
-                dealService.findByMerchant(merchant)),
+    public ResponseEntity<ApiResponse<DealSummaryDTO>> findByMerchant(@PathVariable Merchant merchant, @RequestParam(name = "dealLastDate", required = false) Instant dealLastDate) {
+        return new ResponseEntity<>(ApiResponse.success(dealService.findByMerchant(merchant, dealLastDate)),
                 HttpStatus.OK
         );
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<DealSummaryDTO>>> findByMerchants(@RequestParam("merchants") List<Merchant> merchants) {
+        return ResponseEntity.ok(ApiResponse.success(dealService.findByMerchants(merchants)));
     }
 
     @DeleteMapping("/{merchant}")
