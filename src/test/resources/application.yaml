@@ -3,6 +3,9 @@ spring:
     name: merchant-control-test
   config:
     import: ""
+  jpa:
+    hibernate:
+      ddl-auto: validate
   cloud:
     config:
       enabled: false
