@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import org.apache.kafka.common.serialization.Deserializer;
 import tgb.cryptoexchange.commons.enums.Merchant;
+import tgb.cryptoexchange.merchantcontrol.enums.FiatCurrency;
 import tgb.cryptoexchange.merchantcontrol.exception.DeserializeEventException;
 
 import java.nio.charset.StandardCharsets;
@@ -18,6 +19,8 @@ public class DealReceive {
     private String appId;
 
     private Merchant merchant;
+
+    private FiatCurrency fiatCurrency;
 
     private Integer amount;
 
