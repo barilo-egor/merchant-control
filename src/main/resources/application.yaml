@@ -3,3 +3,6 @@ spring:
     name: merchant-control
   config:
     import: optional:file:config/config.yml
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1
