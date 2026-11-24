@@ -7,9 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.util.CollectionUtils;
 import tgb.cryptoexchange.commons.enums.Merchant;
-import tgb.cryptoexchange.merchantcontrol.entity.Deal;
+import tgb.cryptoexchange.merchantcontrol.enums.FiatCurrency;
+import tgb.cryptoexchange.merchantcontrol.projection.MerchantDealIdProjection;
+import tgb.cryptoexchange.merchantcontrol.projection.MerchantDealTotalProjection;
 
 import java.time.Instant;
 import java.util.*;
@@ -22,9 +23,10 @@ import java.util.*;
 public class DealSummaryDTO {
 
     @Builder.Default
-    private Map<String, List<Long>> dealIdsByAppId = new HashMap<>();
+    private Map<String, List<Long>> dealIdsByAppId = new LinkedHashMap<>();
 
-    private Integer totalAmount;
+    @Builder.Default
+    private Map<FiatCurrency, Long> totalAmounts = new EnumMap<>(FiatCurrency.class);
 
     @JsonSerialize(using = InstantSerializer.class)
     private Instant dealLastDate;
@@ -33,42 +35,37 @@ public class DealSummaryDTO {
 
     private String appId;
 
-    public static DealSummaryDTO fromEntity(Merchant merchant, List<Deal> deals) {
-        if (CollectionUtils.isEmpty(deals)) {
-            return DealSummaryDTO.builder()
-                    .dealIdsByAppId(Collections.emptyMap())
-                    .merchant(merchant)
-                    .totalAmount(0)
-                    .build();
-        }
-
-        Map<String, List<Long>> idsByAppId = new HashMap<>();
-        int totalAmount = 0;
+    public static DealSummaryDTO fromProjections(Merchant merchant,
+                                                 List<MerchantDealTotalProjection> totals,
+                                                 List<MerchantDealIdProjection> dealIds) {
+        Map<FiatCurrency, Long> totalAmounts = new EnumMap<>(FiatCurrency.class);
         Instant lastDate = null;
 
-        for (Deal deal : deals) {
-            if (Objects.nonNull(deal.getAppId()) && Objects.nonNull(deal.getDealId())) {
-                idsByAppId.computeIfAbsent(deal.getAppId(), k -> new ArrayList<>())
-                        .add(deal.getDealId());
+        for (MerchantDealTotalProjection total : totals) {
+            if (Objects.nonNull(total.getFiatCurrency())
+                    && Objects.nonNull(total.getTotalAmount())
+                    && total.getTotalAmount() > 0) {
+                totalAmounts.put(total.getFiatCurrency(), total.getTotalAmount());
             }
 
-            if (Objects.nonNull(deal.getAmount())) {
-                totalAmount += deal.getAmount();
+            Instant currencyLastDate = total.getDealLastDate();
+            if (Objects.nonNull(currencyLastDate) && (Objects.isNull(lastDate) || currencyLastDate.isAfter(lastDate))) {
+                lastDate = currencyLastDate;
             }
+        }
 
-            Instant currentDate = deal.getCreateDate();
-            if (Objects.nonNull(currentDate) && (Objects.isNull(lastDate) || currentDate.isAfter(lastDate))) {
-                lastDate = currentDate;
-            }
+        Map<String, List<Long>> idsByAppId = new LinkedHashMap<>();
+        for (MerchantDealIdProjection dealId : dealIds) {
+            idsByAppId.computeIfAbsent(dealId.getAppId(), k -> new ArrayList<>())
+                    .add(dealId.getDealId());
         }
 
         return DealSummaryDTO.builder()
                 .dealIdsByAppId(idsByAppId)
-                .totalAmount(totalAmount)
+                .totalAmounts(totalAmounts)
                 .dealLastDate(lastDate)
                 .merchant(merchant)
                 .build();
-
     }
 
 }
