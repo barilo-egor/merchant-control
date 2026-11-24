@@ -3,12 +3,12 @@ package tgb.cryptoexchange.merchantcontrol.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import tgb.cryptoexchange.commons.enums.Merchant;
 import tgb.cryptoexchange.exception.BadRequestException;
 import tgb.cryptoexchange.merchantcontrol.dto.DealSummaryDTO;
 import tgb.cryptoexchange.merchantcontrol.entity.Deal;
-import tgb.cryptoexchange.merchantcontrol.enums.FiatCurrency;
 import tgb.cryptoexchange.merchantcontrol.kafka.DealReceive;
 import tgb.cryptoexchange.merchantcontrol.projection.MerchantDealIdProjection;
 import tgb.cryptoexchange.merchantcontrol.projection.MerchantDealTotalProjection;
@@ -17,7 +17,6 @@ import tgb.cryptoexchange.merchantcontrol.repository.DealRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,11 +33,13 @@ public class DealService {
     public void save(DealReceive dealReceive) {
         log.info("Запрос на сохранение сделки от мерчанта: {}, dealId={}, fiatCurrency={}, amount={}",
                 dealReceive.getMerchant(), dealReceive.getDealId(), dealReceive.getFiatCurrency(), dealReceive.getAmount());
+        Assert.notNull(dealReceive.getFiatCurrency(), () -> String.format(
+                "Не указана фиатная валюта сделки: dealId=%s, appId=%s", dealReceive.getDealId(), dealReceive.getAppId()));
         Deal deal = Deal.builder()
                 .dealId(dealReceive.getDealId())
                 .appId(dealReceive.getAppId())
                 .merchant(dealReceive.getMerchant())
-                .fiatCurrency(Objects.requireNonNullElse(dealReceive.getFiatCurrency(), FiatCurrency.RUB))
+                .fiatCurrency(dealReceive.getFiatCurrency())
                 .amount(dealReceive.getAmount())
                 .createDate(dealReceive.getCreateDate())
                 .build();
