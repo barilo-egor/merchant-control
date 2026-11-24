@@ -198,8 +198,8 @@ class DealServiceTest {
     }
 
     @Test
-    @DisplayName("findByMerchants должен возвращать только мерчантов со сделками и исключать мерчантов без сделок")
-    void findByMerchants_ShouldExcludeMerchantsWithoutDeals() {
+    @DisplayName("findByMerchants должен возвращать всех запрошенных мерчантов, включая мерчантов без сделок с пустым totalAmounts")
+    void findByMerchants_ShouldIncludeMerchantsWithoutDeals() {
         List<Merchant> merchants = List.of(Merchant.ALFA_TEAM, Merchant.BIT_ZONE);
         MerchantDealTotalProjection rubTotal = total(Merchant.ALFA_TEAM, RUB, 1256, Instant.parse("2026-01-01T12:00:00Z"));
         MerchantDealIdProjection firstDealId = dealId(Merchant.ALFA_TEAM, "app1", 1L);
@@ -208,10 +208,14 @@ class DealServiceTest {
 
         List<DealSummaryDTO> results = dealService.findByMerchants(merchants);
 
-        assertThat(results).hasSize(1);
+        assertThat(results).hasSize(2);
         assertThat(results.get(0).getMerchant()).isEqualTo(Merchant.ALFA_TEAM);
         assertThat(results.get(0).getTotalAmounts()).containsOnly(entry(RUB, 1256L));
         assertThat(results.get(0).getDealIdsByAppId()).containsOnly(entry("app1", List.of(1L)));
+        assertThat(results.get(1).getMerchant()).isEqualTo(Merchant.BIT_ZONE);
+        assertThat(results.get(1).getTotalAmounts()).isEmpty();
+        assertThat(results.get(1).getDealIdsByAppId()).isEmpty();
+        assertThat(results.get(1).getDealLastDate()).isNull();
     }
 
     @Test

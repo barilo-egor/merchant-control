@@ -59,9 +59,7 @@ public class DealService {
         if (CollectionUtils.isEmpty(merchants)) {
             return List.of();
         }
-        return getSummaries(merchants, null).stream()
-                .filter(summary -> !summary.getTotalAmounts().isEmpty())
-                .toList();
+        return getSummaries(merchants, null);
     }
 
     public void deleteByMerchantAndDate(Merchant merchant, Instant dealLastDate) {

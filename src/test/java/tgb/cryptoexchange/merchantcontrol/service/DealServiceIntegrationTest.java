@@ -113,8 +113,8 @@ class DealServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("findByMerchants должен возвращать только мерчантов со сделками и пропускать мерчантов без сделок")
-    void findByMerchants_ShouldReturnOnlyMerchantsWithPositiveTotals() {
+    @DisplayName("findByMerchants должен возвращать всех запрошенных мерчантов, а у мерчантов без положительных сумм — пустой totalAmounts")
+    void findByMerchants_ShouldReturnAllRequestedMerchantsWithEmptyTotalsWhenNoPositiveDeals() {
         dealRepository.save(deal(Merchant.EXTASY_PAY, "TG", 15L, KZT, 0, Instant.now()));
 
         List<DealSummaryDTO> results = dealService.findByMerchants(
@@ -122,10 +122,13 @@ class DealServiceIntegrationTest {
 
         assertThat(results)
                 .extracting(DealSummaryDTO::getMerchant)
-                .containsExactly(Merchant.SETTLE_X, Merchant.ALFA_TEAM);
-        assertThat(results.get(0).getTotalAmounts()).containsOnly(entry(RUB, 1388L));
-        assertThat(results.get(0).getDealIdsByAppId()).containsOnly(entry("TG", List.of(2L)));
-        assertThat(results.get(1).getTotalAmounts()).containsOnly(entry(RUB, 1690L));
+                .containsExactly(Merchant.BIT_ZONE, Merchant.EXTASY_PAY, Merchant.SETTLE_X, Merchant.ALFA_TEAM);
+        assertThat(results.get(0).getTotalAmounts()).isEmpty();
+        assertThat(results.get(0).getDealIdsByAppId()).isEmpty();
+        assertThat(results.get(1).getTotalAmounts()).isEmpty();
+        assertThat(results.get(2).getTotalAmounts()).containsOnly(entry(RUB, 1388L));
+        assertThat(results.get(2).getDealIdsByAppId()).containsOnly(entry("TG", List.of(2L)));
+        assertThat(results.get(3).getTotalAmounts()).containsOnly(entry(RUB, 1690L));
     }
 
     @Test
