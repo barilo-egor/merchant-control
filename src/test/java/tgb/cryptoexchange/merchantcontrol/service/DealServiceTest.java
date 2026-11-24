@@ -82,21 +82,17 @@ class DealServiceTest {
     }
 
     @Test
-    @DisplayName("Если фиатная валюта не пришла, save должен сохранить сделку в рублях.")
-    void save_ShouldSaveAsRub_WhenFiatCurrencyIsMissing() {
+    @DisplayName("save должен отклонять сделку без фиатной валюты и не сохранять её")
+    void save_ShouldThrow_WhenFiatCurrencyIsMissing() {
         DealReceive request = new DealReceive();
         request.setDealId(123L);
         request.setFiatCurrency(null);
-        request.setAmount(500);
 
-        dealService.save(request);
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> dealService.save(request))
+                .withMessageContaining("dealId=123");
 
-        ArgumentCaptor<Deal> dealCaptor = ArgumentCaptor.forClass(Deal.class);
-        verify(dealRepository).save(dealCaptor.capture());
-        assertThat(dealCaptor.getValue())
-                .returns(123L, Deal::getDealId)
-                .returns(RUB, Deal::getFiatCurrency)
-                .returns(500, Deal::getAmount);
+        verify(dealRepository, never()).save(any(Deal.class));
     }
 
     @Test
